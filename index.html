@@ -2,16 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Humanity Live</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  >
+
+  <title>Humanity Live — Explore Our World</title>
 
   <meta
     name="description"
-    content="Join humanity. See your country, get your human number, and watch the world connect live."
+    content="Join humanity, explore the world and watch countries connect live."
   >
 
-  <meta name="theme-color" content="#050505">
+  <meta name="theme-color" content="#07110d">
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  >
 
   <style>
     * {
@@ -19,12 +30,15 @@
     }
 
     :root {
-      --green: #72ff9c;
-      --text: #ffffff;
-      --muted: #a0a0a0;
-      --card: rgba(255,255,255,0.06);
-      --border: rgba(255,255,255,0.11);
-      --red: #ff9292;
+      --bg: #07100c;
+      --panel: rgba(14, 24, 19, 0.88);
+      --panel2: rgba(20, 34, 27, 0.92);
+      --border: rgba(255,255,255,0.10);
+      --text: #f5f7f6;
+      --muted: #98a49d;
+      --green: #70f5a0;
+      --green2: #24c971;
+      --danger: #ff8e8e;
     }
 
     html {
@@ -34,292 +48,547 @@
     body {
       margin: 0;
       min-height: 100vh;
+      color: var(--text);
       background:
         radial-gradient(
-          circle at top,
-          #17261d 0%,
-          #0a0a0a 34%,
-          #050505 72%
+          circle at 50% -20%,
+          #193a29 0%,
+          #09130e 34%,
+          #050806 75%
         );
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-      text-align: center;
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
     }
 
-    .container {
-      width: min(94%, 720px);
+    .app {
+      width: min(1180px, 96%);
       margin: 0 auto;
-      padding: 34px 0 60px;
+      padding: 22px 0 60px;
     }
 
-    .live-badge {
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-mark {
+      width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background:
+        radial-gradient(
+          circle at 35% 30%,
+          #8cffb4,
+          #20b566 55%,
+          #08733f
+        );
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.12),
+        0 8px 28px rgba(40,220,120,0.18);
+    }
+
+    .brand-name {
+      font-size: 19px;
+    }
+
+    .live-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(114,255,156,0.25);
-      background: rgba(114,255,156,0.07);
+      border: 1px solid rgba(112,245,160,0.20);
+      background: rgba(112,245,160,0.07);
       color: var(--green);
-      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 11px;
       font-weight: 800;
-      letter-spacing: 1px;
+      letter-spacing: 1.3px;
     }
 
     .live-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 12px var(--green);
-      animation: pulse 1.3s infinite;
+      box-shadow: 0 0 10px var(--green);
+      animation: pulse 1.4s infinite;
     }
 
     @keyframes pulse {
-      0%, 100% {
+      0%,100% {
         opacity: 1;
-        transform: scale(1);
       }
 
       50% {
-        opacity: 0.45;
-        transform: scale(0.75);
+        opacity: .35;
       }
     }
 
-    .earth {
-      font-size: 76px;
-      line-height: 1;
-      margin: 18px 0 14px;
+    .hero {
+      display: grid;
+      grid-template-columns: 1.65fr .8fr;
+      gap: 18px;
+      align-items: stretch;
     }
 
-    /* COUNTRY LIVE ROW */
-
-    .country-strip {
-      display: flex;
-      gap: 9px;
-      overflow-x: auto;
-      padding: 4px 2px 12px;
-      margin: 0 auto 15px;
-      scrollbar-width: none;
+    .map-shell {
+      position: relative;
+      min-height: 640px;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #0b1711;
+      box-shadow:
+        0 35px 90px rgba(0,0,0,.35);
     }
 
-    .country-strip::-webkit-scrollbar {
-      display: none;
+    #map {
+      width: 100%;
+      height: 640px;
+      background: #101b16;
     }
 
-    .mini-country {
-      flex: 0 0 72px;
-      padding: 9px 5px;
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.05);
+    .map-header {
+      position: absolute;
+      z-index: 500;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      pointer-events: none;
     }
 
-    .mini-country img {
-      display: block;
-      width: 38px;
-      height: 25px;
-      object-fit: cover;
-      margin: 0 auto 6px;
-      border-radius: 4px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    .map-title-card {
+      display: inline-block;
+      max-width: 440px;
+      padding: 16px 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 17px;
+      background: rgba(5,10,7,.78);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 10px 35px rgba(0,0,0,.25);
     }
 
-    .mini-code {
-      color: #999;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 1px;
-    }
-
-    .mini-count {
-      margin-top: 2px;
-      color: #fff;
-      font-size: 17px;
-      font-weight: 900;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(42px, 9vw, 64px);
-      line-height: 1;
-      letter-spacing: -2px;
-    }
-
-    .subtitle {
-      max-width: 520px;
-      margin: 17px auto 38px;
-      color: #aaa;
-      font-size: 17px;
-      line-height: 1.55;
-    }
-
-    .world-label {
+    .map-eyebrow {
       color: var(--green);
-      font-size: 12px;
-      font-weight: 800;
+      font-size: 10px;
+      font-weight: 900;
       letter-spacing: 2px;
     }
 
-    .counter {
+    .map-title {
+      margin-top: 5px;
+      font-size: clamp(22px, 4vw, 35px);
+      line-height: 1.05;
+      font-weight: 900;
+      letter-spacing: -1.2px;
+    }
+
+    .map-subtitle {
       margin-top: 7px;
-      font-size: clamp(64px, 17vw, 100px);
-      font-weight: 900;
-      line-height: 1;
-      letter-spacing: -4px;
-    }
-
-    .counter-label {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 18px;
-    }
-
-    .country-card {
-      margin: 36px 0 20px;
-      padding: 30px 24px;
-      border: 1px solid var(--border);
-      border-radius: 26px;
-      background: var(--card);
-      backdrop-filter: blur(16px);
-      box-shadow: 0 18px 60px rgba(0,0,0,0.25);
-    }
-
-    .country-top {
-      margin-bottom: 14px;
-      color: #777;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 1.8px;
-    }
-
-    .country-flag {
-      min-height: 62px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 12px;
-      font-size: 56px;
-    }
-
-    .country-flag img {
-      width: 90px;
-      max-height: 62px;
-      object-fit: contain;
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-    }
-
-    .country-name {
-      font-size: 30px;
-      font-weight: 900;
-    }
-
-    .country-count {
-      margin-top: 10px;
-      color: #aaa;
-      font-size: 16px;
-    }
-
-    .status {
-      margin-top: 10px;
-      color: #777;
+      color: #a8b1ac;
       font-size: 13px;
+      line-height: 1.45;
     }
 
-    .error {
-      color: var(--red);
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
 
-    button {
-      width: 100%;
-      border: 0;
-      border-radius: 18px;
-      padding: 20px;
-      font-size: 18px;
-      font-weight: 900;
-      cursor: pointer;
-      transition: transform 0.18s ease;
-    }
-
-    button:hover {
-      transform: translateY(-2px);
-    }
-
-    button:active {
-      transform: scale(0.98);
-    }
-
-    button:disabled {
-      cursor: default;
-      opacity: 0.7;
-      transform: none;
-    }
-
-    #joinButton {
-      background: #ffffff;
-      color: #050505;
-    }
-
-    .result {
-      display: none;
-      margin-top: 20px;
-      padding: 28px 22px;
-      border: 1px solid rgba(114,255,156,0.18);
+    .panel {
+      padding: 22px;
+      border: 1px solid var(--border);
       border-radius: 24px;
       background:
         linear-gradient(
           145deg,
-          rgba(114,255,156,0.10),
-          rgba(255,255,255,0.04)
+          rgba(255,255,255,.055),
+          rgba(255,255,255,.025)
         );
+      backdrop-filter: blur(20px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.18);
     }
 
-    .result-title {
-      color: #a0a0a0;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 2px;
+    .label {
+      color: #7f8b84;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1.9px;
     }
 
-    .human-number {
-      margin-top: 7px;
-      font-size: clamp(34px, 9vw, 52px);
+    .world-number {
+      margin-top: 4px;
+      font-size: clamp(54px, 8vw, 80px);
+      line-height: .95;
+      font-weight: 950;
+      letter-spacing: -4px;
+    }
+
+    .world-text {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .country-box {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-top: 16px;
+    }
+
+    .country-box img {
+      width: 68px;
+      max-height: 46px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.28);
+    }
+
+    .country-info {
+      min-width: 0;
+      text-align: left;
+    }
+
+    .country-name {
+      font-size: 22px;
       font-weight: 900;
     }
 
+    .country-count {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .country-status {
+      margin-top: 13px;
+      color: #758079;
+      font-size: 12px;
+    }
+
+    .error {
+      color: var(--danger);
+    }
+
+    #joinButton {
+      width: 100%;
+      margin-top: 18px;
+      padding: 17px 18px;
+      border: 0;
+      border-radius: 15px;
+      color: #06100a;
+      background:
+        linear-gradient(
+          135deg,
+          #f2fff6,
+          #9cffbd
+        );
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: .6px;
+      cursor: pointer;
+      box-shadow:
+        0 10px 30px rgba(68,235,129,.15);
+      transition:
+        transform .16s ease,
+        opacity .16s ease;
+    }
+
+    #joinButton:hover {
+      transform: translateY(-2px);
+    }
+
+    #joinButton:active {
+      transform: scale(.985);
+    }
+
+    #joinButton:disabled {
+      cursor: default;
+      opacity: .72;
+      transform: none;
+    }
+
+    .joined-card {
+      display: none;
+      margin-top: 14px;
+      padding: 18px;
+      border-radius: 17px;
+      border: 1px solid rgba(112,245,160,.18);
+      background: rgba(112,245,160,.055);
+    }
+
+    .human-number {
+      margin-top: 3px;
+      font-size: 30px;
+      font-weight: 950;
+      letter-spacing: -1px;
+    }
+
     .joined-message {
-      margin-top: 10px;
-      color: #aaa;
-      line-height: 1.5;
+      margin-top: 5px;
+      color: #9ba69f;
+      font-size: 12px;
     }
 
     #shareButton {
+      margin-top: 13px;
+      width: 100%;
+      padding: 13px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      color: white;
+      background: rgba(255,255,255,.07);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .joined-countries {
       margin-top: 18px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.10);
-      color: #fff;
+    }
+
+    .joined-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 15px;
+      margin-bottom: 11px;
+    }
+
+    .joined-title {
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .joined-note {
+      color: #667169;
+      font-size: 11px;
+    }
+
+    #countryStrip {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 2px 1px 8px;
+      scrollbar-width: none;
+    }
+
+    #countryStrip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .country-chip {
+      flex: 0 0 auto;
+      min-width: 104px;
+      padding: 11px 12px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 14px;
+      background: rgba(255,255,255,.045);
+      cursor: pointer;
+      transition:
+        transform .15s ease,
+        background .15s ease;
+    }
+
+    .country-chip:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,.075);
+    }
+
+    .country-chip img {
+      width: 33px;
+      height: 22px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 7px;
+    }
+
+    .chip-name {
+      max-width: 100px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: #bcc5bf;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .chip-number {
+      margin-top: 2px;
+      font-size: 20px;
+      font-weight: 950;
+    }
+
+    .empty-countries {
+      color: #717b75;
+      font-size: 13px;
+      padding: 10px 0;
     }
 
     .footer {
-      margin-top: 34px;
-      color: #555;
-      font-size: 12px;
+      margin-top: 25px;
+      text-align: center;
+      color: #566059;
+      font-size: 11px;
       line-height: 1.6;
     }
 
-    @media (max-width: 480px) {
-      .container {
-        padding-top: 26px;
+    .leaflet-control-zoom a {
+      background: rgba(10,17,13,.92) !important;
+      color: white !important;
+      border-bottom-color: rgba(255,255,255,.1) !important;
+    }
+
+    .leaflet-control-zoom {
+      border: 1px solid rgba(255,255,255,.1) !important;
+      border-radius: 11px !important;
+      overflow: hidden;
+    }
+
+    .leaflet-control-attribution {
+      background: rgba(3,8,5,.75) !important;
+      color: #a9b0ac !important;
+      font-size: 9px !important;
+    }
+
+    .leaflet-control-attribution a {
+      color: #b8c5bd !important;
+    }
+
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+      color: white;
+      background: #101a15;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.4);
+    }
+
+    .map-popup {
+      min-width: 170px;
+      font-family:
+        Inter,
+        system-ui,
+        sans-serif;
+    }
+
+    .popup-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .popup-top img {
+      width: 40px;
+      max-height: 28px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .popup-country {
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .popup-count {
+      margin-top: 9px;
+      color: #b0bbb4;
+      font-size: 12px;
+    }
+
+    .popup-count strong {
+      display: block;
+      margin-top: 2px;
+      color: var(--green);
+      font-size: 20px;
+    }
+
+    @media (max-width: 850px) {
+      .app {
+        width: min(95%, 720px);
       }
 
-      .earth {
-        font-size: 68px;
+      .hero {
+        grid-template-columns: 1fr;
       }
 
-      .mini-country {
-        flex-basis: 66px;
+      .map-shell {
+        min-height: 520px;
+      }
+
+      #map {
+        height: 520px;
+      }
+
+      .side {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .app {
+        padding-top: 14px;
+      }
+
+      .brand-name {
+        font-size: 17px;
+      }
+
+      .live-pill {
+        padding: 7px 9px;
+        font-size: 9px;
+      }
+
+      .map-shell {
+        border-radius: 21px;
+        min-height: 500px;
+      }
+
+      #map {
+        height: 500px;
+      }
+
+      .map-header {
+        top: 12px;
+        left: 12px;
+        right: 12px;
+      }
+
+      .map-title-card {
+        padding: 13px 14px;
+        max-width: 82%;
+      }
+
+      .map-subtitle {
+        font-size: 11px;
+      }
+
+      .panel {
+        border-radius: 20px;
+        padding: 19px;
       }
     }
   </style>
@@ -327,185 +596,203 @@
 
 <body>
 
-  <main class="container">
+  <main class="app">
 
-    <div class="live-badge">
-      <span class="live-dot"></span>
-      LIVE WORLD COUNTER
-    </div>
-
-    <div class="earth">🌍</div>
-
-    <!-- LIVE COUNTRY COUNTS -->
-
-    <div class="country-strip">
-
-      <div class="mini-country">
-        <img src="https://flagcdn.com/w160/am.png" alt="Armenia">
-        <div class="mini-code">AM</div>
-        <div class="mini-count" id="count-AM">0</div>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">🌍</div>
+        <div class="brand-name">Humanity Live</div>
       </div>
 
-      <div class="mini-country">
-        <img src="https://flagcdn.com/w160/be.png" alt="Belgium">
-        <div class="mini-code">BE</div>
-        <div class="mini-count" id="count-BE">0</div>
+      <div class="live-pill">
+        <span class="live-dot"></span>
+        LIVE
+      </div>
+    </header>
+
+    <section class="hero">
+
+      <div class="map-shell">
+
+        <div class="map-header">
+          <div class="map-title-card">
+            <div class="map-eyebrow">
+              LIVE HUMANITY MAP
+            </div>
+
+            <div class="map-title">
+              One planet.<br>
+              Every human.
+            </div>
+
+            <div class="map-subtitle">
+              Explore the world.
+              Countries light up as people join Humanity Live.
+            </div>
+          </div>
+        </div>
+
+        <div id="map"></div>
+
       </div>
 
-      <div class="mini-country">
-        <img src="https://flagcdn.com/w160/us.png" alt="United States">
-        <div class="mini-code">US</div>
-        <div class="mini-count" id="count-US">0</div>
+      <aside class="side">
+
+        <section class="panel">
+
+          <div class="label">
+            HUMANS JOINED WORLDWIDE
+          </div>
+
+          <div
+            class="world-number"
+            id="worldCounter"
+          >
+            0
+          </div>
+
+          <div class="world-text">
+            humans connected so far
+          </div>
+
+        </section>
+
+        <section class="panel">
+
+          <div class="label">
+            YOUR LOCATION
+          </div>
+
+          <div class="country-box">
+
+            <div id="countryFlag">
+              🌐
+            </div>
+
+            <div class="country-info">
+
+              <div
+                class="country-name"
+                id="countryName"
+              >
+                Detecting...
+              </div>
+
+              <div
+                class="country-count"
+                id="countryCounter"
+              >
+                —
+              </div>
+
+            </div>
+
+          </div>
+
+          <div
+            class="country-status"
+            id="countryStatus"
+          >
+            Detecting your country...
+          </div>
+
+          <button
+            id="joinButton"
+            disabled
+          >
+            DETECTING LOCATION...
+          </button>
+
+          <div
+            class="joined-card"
+            id="joinedCard"
+          >
+
+            <div class="label">
+              YOU ARE
+            </div>
+
+            <div
+              class="human-number"
+              id="humanNumber"
+            >
+              HUMAN
+            </div>
+
+            <div
+              class="joined-message"
+              id="joinedMessage"
+            ></div>
+
+            <button id="shareButton">
+              SHARE HUMANITY LIVE
+            </button>
+
+          </div>
+
+        </section>
+
+      </aside>
+
+    </section>
+
+    <section class="joined-countries">
+
+      <div class="joined-header">
+
+        <div class="joined-title">
+          Countries connected
+        </div>
+
+        <div class="joined-note">
+          Flags appear only after someone joins
+        </div>
+
       </div>
 
-      <div class="mini-country">
-        <img src="https://flagcdn.com/w160/fr.png" alt="France">
-        <div class="mini-code">FR</div>
-        <div class="mini-count" id="count-FR">0</div>
-      </div>
+      <div id="countryStrip">
 
-      <div class="mini-country">
-        <img src="https://flagcdn.com/w160/jp.png" alt="Japan">
-        <div class="mini-code">JP</div>
-        <div class="mini-count" id="count-JP">0</div>
-      </div>
+        <div class="empty-countries">
+          Loading connected countries...
+        </div>
 
-      <div class="mini-country">
-        <img src="https://flagcdn.com/w160/br.png" alt="Brazil">
-        <div class="mini-code">BR</div>
-        <div class="mini-count" id="count-BR">0</div>
-      </div>
-
-      <div class="mini-country">
-        <img src="https://flagcdn.com/w160/in.png" alt="India">
-        <div class="mini-code">IN</div>
-        <div class="mini-count" id="count-IN">0</div>
-      </div>
-
-      <div class="mini-country">
-        <img src="https://flagcdn.com/w160/za.png" alt="South Africa">
-        <div class="mini-code">ZA</div>
-        <div class="mini-count" id="count-ZA">0</div>
-      </div>
-
-    </div>
-
-    <h1>Humanity Live</h1>
-
-    <div class="subtitle">
-      One planet. Every country. One growing human connection.
-    </div>
-
-    <div class="world-label">
-      HUMANS JOINED WORLDWIDE
-    </div>
-
-    <div
-      class="counter"
-      id="worldCounter"
-    >
-      ...
-    </div>
-
-    <div class="counter-label">
-      humans have joined
-    </div>
-
-    <section class="country-card">
-
-      <div class="country-top">
-        YOUR COUNTRY
-      </div>
-
-      <div
-        class="country-flag"
-        id="countryFlag"
-      >
-        🌐
-      </div>
-
-      <div
-        class="country-name"
-        id="countryName"
-      >
-        Detecting your country...
-      </div>
-
-      <div class="country-count">
-        <span id="countryCounter">...</span>
-        humans joined
-      </div>
-
-      <div
-        class="status"
-        id="countryStatus"
-      >
-        Detecting automatically...
       </div>
 
     </section>
 
-    <button
-      id="joinButton"
-      disabled
-    >
-      DETECTING COUNTRY...
-    </button>
-
-    <section
-      class="result"
-      id="result"
-    >
-
-      <div class="result-title">
-        YOU ARE
-      </div>
-
-      <div
-        class="human-number"
-        id="humanNumber"
-      >
-        HUMAN #0
-      </div>
-
-      <div
-        class="joined-message"
-        id="joinedMessage"
-      >
-        You joined humanity.
-      </div>
-
-      <button id="shareButton">
-        SHARE YOUR NUMBER ↗
-      </button>
-
-    </section>
-
-    <div class="footer">
-      One browser can join once.<br>
-      Country detection is approximate and may differ when using a VPN.
-    </div>
+    <footer class="footer">
+      Humanity Live · One planet. Every country. One growing human connection.
+    </footer>
 
   </main>
+
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
 
 
   <script type="module">
 
     import {
       initializeApp
-    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-
+    } from
+      "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 
     import {
       getDatabase,
       ref,
       onValue,
-      runTransaction
-    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+      get,
+      update,
+      increment
+    } from
+      "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
 
     const firebaseConfig = {
-
       apiKey:
         "AIzaSyDJWMHrk6-EwjG_LXLK0CAj3uFLRCuba0Q",
 
@@ -532,7 +819,6 @@
     const app =
       initializeApp(firebaseConfig);
 
-
     const db =
       getDatabase(app);
 
@@ -540,107 +826,427 @@
     const worldRef =
       ref(db, "counters/world");
 
-
-    let countryCode = null;
-    let countryName = null;
-    let countryRef = null;
+    const countriesRef =
+      ref(db, "countries");
 
 
     const worldCounter =
-      document.getElementById("worldCounter");
+      document.getElementById(
+        "worldCounter"
+      );
 
-    const countryCounter =
-      document.getElementById("countryCounter");
+    const countryFlag =
+      document.getElementById(
+        "countryFlag"
+      );
 
     const countryNameEl =
-      document.getElementById("countryName");
+      document.getElementById(
+        "countryName"
+      );
 
-    const countryFlagEl =
-      document.getElementById("countryFlag");
+    const countryCounter =
+      document.getElementById(
+        "countryCounter"
+      );
 
     const countryStatus =
-      document.getElementById("countryStatus");
+      document.getElementById(
+        "countryStatus"
+      );
 
     const joinButton =
-      document.getElementById("joinButton");
+      document.getElementById(
+        "joinButton"
+      );
 
-    const result =
-      document.getElementById("result");
+    const joinedCard =
+      document.getElementById(
+        "joinedCard"
+      );
 
     const humanNumber =
-      document.getElementById("humanNumber");
+      document.getElementById(
+        "humanNumber"
+      );
 
     const joinedMessage =
-      document.getElementById("joinedMessage");
+      document.getElementById(
+        "joinedMessage"
+      );
 
     const shareButton =
-      document.getElementById("shareButton");
+      document.getElementById(
+        "shareButton"
+      );
+
+    const countryStrip =
+      document.getElementById(
+        "countryStrip"
+      );
 
 
-    function numberFormat(value) {
+    let detectedCountryCode = "";
+    let detectedCountryName = "";
+    let countryData = {};
+    let geoLayer = null;
 
-      return Number(
-        value || 0
-      ).toLocaleString("en-US");
+    const layerByCountry = {};
 
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat(
+        "en-US"
+      ).format(value || 0);
     }
 
 
-    function countryCodeToFlagEmoji(code) {
-
-      if (!code || code.length !== 2) {
-        return "🌍";
-      }
-
-      return code
-        .toUpperCase()
-        .replace(
-          /./g,
-          char =>
-            String.fromCodePoint(
-              127397 + char.charCodeAt()
-            )
-        );
-
+    function flagUrl(code) {
+      return (
+        "https://flagcdn.com/w160/" +
+        code.toLowerCase() +
+        ".png"
+      );
     }
 
 
-    function showCountryFlag(code, name) {
+    function showFlag(
+      element,
+      code,
+      name
+    ) {
 
-      countryFlagEl.innerHTML = "";
+      element.innerHTML = "";
 
       const img =
         document.createElement("img");
 
       img.src =
-        "https://flagcdn.com/w160/" +
-        code.toLowerCase() +
-        ".png";
+        flagUrl(code);
 
       img.alt =
         name + " flag";
 
-      img.onerror = function () {
+      element.appendChild(img);
+    }
 
-        countryFlagEl.textContent =
-          countryCodeToFlagEmoji(code);
 
-      };
+    /* =========================
+       MAP
+    ========================= */
 
-      countryFlagEl.appendChild(img);
+    const map =
+      L.map(
+        "map",
+        {
+          zoomControl: false,
+          worldCopyJump: true,
+          minZoom: 2
+        }
+      ).setView(
+        [25, 10],
+        2
+      );
+
+
+    L.control
+      .zoom({
+        position: "bottomright"
+      })
+      .addTo(map);
+
+
+    L.tileLayer(
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      {
+        maxZoom: 18,
+
+        attribution:
+          '&copy; OpenStreetMap contributors'
+      }
+    ).addTo(map);
+
+
+    function getCountryCode(feature) {
+
+      return (
+        feature.properties[
+          "ISO3166-1-Alpha-2"
+        ] || ""
+      ).toUpperCase();
 
     }
 
 
-    /* WORLD COUNTER */
+    function getCountryName(feature) {
+
+      return (
+        feature.properties.name ||
+        "Unknown"
+      );
+
+    }
+
+
+    function mapColor(code) {
+
+      const count =
+        Number(countryData[code] || 0);
+
+      if (count >= 1000) {
+        return "#12cf6e";
+      }
+
+      if (count >= 100) {
+        return "#2bd97b";
+      }
+
+      if (count >= 10) {
+        return "#52e895";
+      }
+
+      if (count >= 1) {
+        return "#7af5ab";
+      }
+
+      return "#25342c";
+    }
+
+
+    function mapStyle(feature) {
+
+      const code =
+        getCountryCode(feature);
+
+      const count =
+        Number(countryData[code] || 0);
+
+      return {
+        fillColor:
+          mapColor(code),
+
+        fillOpacity:
+          count > 0
+            ? 0.72
+            : 0.25,
+
+        color:
+          "rgba(255,255,255,.34)",
+
+        weight:
+          0.7
+      };
+
+    }
+
+
+    function openCountryPopup(
+      feature,
+      layer
+    ) {
+
+      const code =
+        getCountryCode(feature);
+
+      if (
+        !code ||
+        code === "-99"
+      ) {
+        return;
+      }
+
+      const name =
+        getCountryName(feature);
+
+      const count =
+        Number(
+          countryData[code] || 0
+        );
+
+      const html = `
+        <div class="map-popup">
+
+          <div class="popup-top">
+
+            <img
+              src="${flagUrl(code)}"
+              alt="${name}"
+            >
+
+            <div class="popup-country">
+              ${name}
+            </div>
+
+          </div>
+
+          <div class="popup-count">
+            Humanity Live
+            <strong>
+              ${formatNumber(count)}
+            </strong>
+          </div>
+
+        </div>
+      `;
+
+      layer.bindPopup(html);
+
+      layer.openPopup();
+
+    }
+
+
+    async function loadMapCountries() {
+
+      try {
+
+        const response =
+          await fetch(
+            "https://raw.githubusercontent.com/datasets/geo-countries/main/data/countries.geojson"
+          );
+
+        if (!response.ok) {
+          throw new Error(
+            "Map data failed to load"
+          );
+        }
+
+        const geojson =
+          await response.json();
+
+
+        geoLayer =
+          L.geoJSON(
+            geojson,
+            {
+
+              style:
+                mapStyle,
+
+              onEachFeature:
+                (
+                  feature,
+                  layer
+                ) => {
+
+                  const code =
+                    getCountryCode(
+                      feature
+                    );
+
+                  if (
+                    code &&
+                    code !== "-99"
+                  ) {
+                    layerByCountry[
+                      code
+                    ] = layer;
+                  }
+
+
+                  layer.on({
+
+                    mouseover:
+                      event => {
+
+                        event.target
+                          .setStyle({
+                            weight: 1.7,
+                            color: "#ffffff",
+                            fillOpacity:
+                              0.82
+                          });
+
+                      },
+
+                    mouseout:
+                      event => {
+
+                        geoLayer
+                          .resetStyle(
+                            event.target
+                          );
+
+                      },
+
+                    click:
+                      () => {
+
+                        openCountryPopup(
+                          feature,
+                          layer
+                        );
+
+                      }
+
+                  });
+
+                }
+
+            }
+          ).addTo(map);
+
+
+      } catch (error) {
+
+        console.error(
+          "Map loading error:",
+          error
+        );
+
+      }
+
+    }
+
+
+    function refreshMapColors() {
+
+      if (!geoLayer) {
+        return;
+      }
+
+      geoLayer.setStyle(
+        mapStyle
+      );
+
+    }
+
+
+    function focusCountry(code) {
+
+      const layer =
+        layerByCountry[code];
+
+      if (!layer) {
+        return;
+      }
+
+      map.fitBounds(
+        layer.getBounds(),
+        {
+          padding:
+            [35, 35],
+
+          maxZoom:
+            5
+        }
+      );
+
+      layer.fire("click");
+
+    }
+
+
+    /* =========================
+       WORLD COUNTER
+    ========================= */
 
     onValue(
       worldRef,
-
       snapshot => {
 
         worldCounter.textContent =
-          numberFormat(
+          formatNumber(
             snapshot.val() || 0
           );
 
@@ -653,315 +1259,488 @@
           error
         );
 
-        worldCounter.textContent = "—";
+      }
+    );
+
+
+    /* =========================
+       COUNTRY LIVE DATA
+    ========================= */
+
+    onValue(
+      countriesRef,
+      snapshot => {
+
+        countryData =
+          snapshot.val() || {};
+
+        renderCountryStrip();
+
+        refreshMapColors();
+
+        if (
+          detectedCountryCode
+        ) {
+
+          countryCounter.textContent =
+            formatNumber(
+              countryData[
+                detectedCountryCode
+              ] || 0
+            ) +
+            " humans joined";
+
+        }
+
+      },
+
+      error => {
+
+        console.error(
+          "Country data error:",
+          error
+        );
 
       }
     );
 
 
-    /* TOP COUNTRY LIVE COUNTERS */
+    function renderCountryStrip() {
 
-    const featuredCountries = [
-      "AM",
-      "BE",
-      "US",
-      "FR",
-      "JP",
-      "BR",
-      "IN",
-      "ZA"
-    ];
+      const entries =
+        Object.entries(
+          countryData
+        )
+        .filter(
+          ([code, count]) =>
+            code &&
+            Number(count) > 0
+        )
+        .sort(
+          (a, b) =>
+            Number(b[1]) -
+            Number(a[1])
+        );
 
 
-    featuredCountries.forEach(
-      code => {
+      countryStrip.innerHTML = "";
 
-        const countryLiveRef =
-          ref(
-            db,
-            "countries/" + code
+
+      if (!entries.length) {
+
+        countryStrip.innerHTML =
+          `
+            <div class="empty-countries">
+              No countries connected yet.
+            </div>
+          `;
+
+        return;
+      }
+
+
+      for (
+        const [code, count]
+        of entries
+      ) {
+
+        const chip =
+          document.createElement(
+            "div"
           );
 
+        chip.className =
+          "country-chip";
 
-        onValue(
-          countryLiveRef,
 
-          snapshot => {
-
-            const element =
-              document.getElementById(
-                "count-" + code
-              );
-
-            if (element) {
-
-              element.textContent =
-                numberFormat(
-                  snapshot.val() || 0
-                );
-
+        const regionName =
+          new Intl.DisplayNames(
+            ["en"],
+            {
+              type: "region"
             }
+          ).of(code) || code;
 
-          },
 
-          error => {
+        chip.innerHTML = `
+          <img
+            src="${flagUrl(code)}"
+            alt="${regionName}"
+          >
 
-            console.error(
-              code + " counter error:",
-              error
-            );
+          <div class="chip-name">
+            ${regionName}
+          </div>
 
+          <div class="chip-number">
+            ${formatNumber(count)}
+          </div>
+        `;
+
+
+        chip.addEventListener(
+          "click",
+          () => {
+            focusCountry(code);
           }
         );
 
-      }
-    );
 
-
-    async function getCountryData() {
-
-      try {
-
-        const response =
-          await fetch(
-            "https://ipapi.co/json/",
-            {
-              cache: "no-store"
-            }
-          );
-
-
-        if (!response.ok) {
-          throw new Error(
-            "Primary lookup failed"
-          );
-        }
-
-
-        const data =
-          await response.json();
-
-
-        const code =
-          (
-            data.country_code ||
-            data.country ||
-            ""
-          ).toUpperCase();
-
-
-        const name =
-          data.country_name || "";
-
-
-        if (code.length === 2) {
-
-          return {
-            code: code,
-            name: name || code
-          };
-
-        }
-
-
-      } catch (error) {
-
-        console.warn(
-          "Primary country detection failed",
-          error
-        );
+        countryStrip
+          .appendChild(chip);
 
       }
-
-
-      try {
-
-        const response =
-          await fetch(
-            "https://ipwho.is/",
-            {
-              cache: "no-store"
-            }
-          );
-
-
-        if (!response.ok) {
-          throw new Error(
-            "Backup lookup failed"
-          );
-        }
-
-
-        const data =
-          await response.json();
-
-
-        const code =
-          (
-            data.country_code || ""
-          ).toUpperCase();
-
-
-        const name =
-          data.country || "";
-
-
-        if (
-          data.success !== false &&
-          code.length === 2
-        ) {
-
-          return {
-            code: code,
-            name: name || code
-          };
-
-        }
-
-
-      } catch (error) {
-
-        console.warn(
-          "Backup country detection failed",
-          error
-        );
-
-      }
-
-
-      throw new Error(
-        "Country detection failed"
-      );
 
     }
 
+
+    /* =========================
+       COUNTRY DETECTION
+    ========================= */
 
     async function detectCountry() {
 
       try {
 
-        const detected =
-          await getCountryData();
+        let data = null;
 
 
-        countryCode =
-          detected.code;
+        try {
 
-
-        countryName =
-          detected.name;
-
-
-        showCountryFlag(
-          countryCode,
-          countryName
-        );
-
-
-        countryNameEl.textContent =
-          countryName;
-
-
-        countryStatus.textContent =
-          "Country detected automatically";
-
-
-        countryRef =
-          ref(
-            db,
-            "countries/" + countryCode
-          );
-
-
-        onValue(
-          countryRef,
-
-          snapshot => {
-
-            countryCounter.textContent =
-              numberFormat(
-                snapshot.val() || 0
-              );
-
-          },
-
-          error => {
-
-            console.error(
-              "Country counter error:",
-              error
+          const response =
+            await fetch(
+              "https://ipapi.co/json/",
+              {
+                cache:
+                  "no-store"
+              }
             );
 
-            countryCounter.textContent =
-              "—";
-
+          if (response.ok) {
+            data =
+              await response.json();
           }
-        );
+
+        } catch (_) {}
 
 
-        const alreadyJoined =
-          localStorage.getItem(
-            "humanityJoined"
-          ) === "yes";
+        if (
+          !data ||
+          !data.country_code
+        ) {
 
-
-        if (alreadyJoined) {
-
-          joinButton.textContent =
-            "YOU JOINED ✓";
-
-          joinButton.disabled =
-            true;
-
-          restoreJoinedResult();
-
-        } else {
-
-          joinButton.textContent =
-            "JOIN FROM " +
-            countryName.toUpperCase() +
-            " " +
-            countryCodeToFlagEmoji(
-              countryCode
+          const backup =
+            await fetch(
+              "https://ipwho.is/",
+              {
+                cache:
+                  "no-store"
+              }
             );
 
-          joinButton.disabled =
-            false;
+          const backupData =
+            await backup.json();
+
+
+          if (
+            !backupData.success
+          ) {
+            throw new Error(
+              "Country detection failed"
+            );
+          }
+
+
+          data = {
+            country_code:
+              backupData.country_code,
+
+            country_name:
+              backupData.country
+          };
 
         }
 
 
+        detectedCountryCode =
+          String(
+            data.country_code
+          )
+          .trim()
+          .toUpperCase();
+
+
+        detectedCountryName =
+          data.country_name ||
+          new Intl.DisplayNames(
+            ["en"],
+            {
+              type: "region"
+            }
+          ).of(
+            detectedCountryCode
+          ) ||
+          detectedCountryCode;
+
+
+        showDetectedCountry();
+
+
       } catch (error) {
 
-        console.error(error);
-
-
-        countryFlagEl.textContent =
-          "🌐";
+        console.error(
+          "Country detection error:",
+          error
+        );
 
 
         countryNameEl.textContent =
-          "Country unavailable";
-
+          "Location unavailable";
 
         countryCounter.textContent =
-          "0";
+          "—";
 
+        countryStatus.textContent =
+          "We could not detect your country.";
 
-        countryStatus.innerHTML =
-          '<span class="error">' +
-          'Could not detect your country. Refresh to try again.' +
-          '</span>';
-
+        countryStatus.classList.add(
+          "error"
+        );
 
         joinButton.textContent =
-          "COUNTRY DETECTION FAILED";
-
+          "LOCATION UNAVAILABLE";
 
         joinButton.disabled =
           true;
 
       }
+
+    }
+
+
+    function showDetectedCountry() {
+
+      showFlag(
+        countryFlag,
+        detectedCountryCode,
+        detectedCountryName
+      );
+
+
+      countryNameEl.textContent =
+        detectedCountryName;
+
+
+      countryCounter.textContent =
+        formatNumber(
+          countryData[
+            detectedCountryCode
+          ] || 0
+        ) +
+        " humans joined";
+
+
+      countryStatus.textContent =
+        "Country detected automatically";
+
+
+      const alreadyJoined =
+        localStorage.getItem(
+          "humanityJoined"
+        ) === "yes";
+
+
+      if (alreadyJoined) {
+
+        joinButton.textContent =
+          "YOU JOINED ✓";
+
+        joinButton.disabled =
+          true;
+
+        restoreJoinedResult();
+
+      } else {
+
+        joinButton.textContent =
+          "JOIN FROM " +
+          detectedCountryName.toUpperCase();
+
+        joinButton.disabled =
+          false;
+
+      }
+
+
+      setTimeout(
+        () => {
+          focusCountry(
+            detectedCountryCode
+          );
+        },
+        700
+      );
+
+    }
+
+
+    /* =========================
+       ATOMIC JOIN
+    ========================= */
+
+    async function joinHumanity() {
+
+      if (
+        !detectedCountryCode
+      ) {
+        return;
+      }
+
+
+      if (
+        localStorage.getItem(
+          "humanityJoined"
+        ) === "yes"
+      ) {
+        return;
+      }
+
+
+      joinButton.disabled =
+        true;
+
+      joinButton.textContent =
+        "JOINING...";
+
+
+      try {
+
+        const updates = {};
+
+
+        updates[
+          "counters/world"
+        ] =
+          increment(1);
+
+
+        updates[
+          "countries/" +
+          detectedCountryCode
+        ] =
+          increment(1);
+
+
+        /*
+          ONE atomic Firebase write:
+          world and country update together.
+        */
+
+        await update(
+          ref(db),
+          updates
+        );
+
+
+        /*
+          Only AFTER Firebase confirms success,
+          save joined state locally.
+        */
+
+        const worldSnapshot =
+          await get(worldRef);
+
+
+        const currentWorld =
+          Number(
+            worldSnapshot.val() || 0
+          );
+
+
+        localStorage.setItem(
+          "humanityJoined",
+          "yes"
+        );
+
+        localStorage.setItem(
+          "humanityNumber",
+          String(currentWorld)
+        );
+
+        localStorage.setItem(
+          "humanityCountry",
+          detectedCountryName
+        );
+
+        localStorage.setItem(
+          "humanityCode",
+          detectedCountryCode
+        );
+
+
+        joinButton.textContent =
+          "YOU JOINED ✓";
+
+        joinButton.disabled =
+          true;
+
+
+        showJoinedResult(
+          currentWorld,
+          detectedCountryName,
+          detectedCountryCode
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "JOIN ERROR:",
+          error
+        );
+
+
+        joinButton.textContent =
+          "JOIN FAILED — TRY AGAIN";
+
+        joinButton.disabled =
+          false;
+
+
+        countryStatus.textContent =
+          "Join was not saved. Please try again.";
+
+        countryStatus.classList.add(
+          "error"
+        );
+
+      }
+
+    }
+
+
+    function showJoinedResult(
+      number,
+      name,
+      code
+    ) {
+
+      joinedCard.style.display =
+        "block";
+
+
+      humanNumber.textContent =
+        "HUMAN #" +
+        formatNumber(number);
+
+
+      joinedMessage.textContent =
+        "Successfully joined from " +
+        name +
+        ".";
+
+
+      focusCountry(code);
 
     }
 
@@ -973,12 +1752,10 @@
           "humanityNumber"
         );
 
-
       const savedCountry =
         localStorage.getItem(
           "humanityCountry"
         );
-
 
       const savedCode =
         localStorage.getItem(
@@ -991,164 +1768,14 @@
       }
 
 
-      const flagEmoji =
-        countryCodeToFlagEmoji(
-          savedCode || countryCode
-        );
+      showJoinedResult(
+        savedNumber,
+        savedCountry ||
+          detectedCountryName,
 
-
-      result.style.display =
-        "block";
-
-
-      humanNumber.textContent =
-        "HUMAN #" +
-        numberFormat(savedNumber);
-
-
-      joinedMessage.textContent =
-        flagEmoji +
-        " You joined from " +
-        (
-          savedCountry ||
-          countryName ||
-          "your country"
-        ) +
-        ".";
-
-    }
-
-
-    async function joinHumanity() {
-
-      if (!countryRef || !countryCode) {
-        return;
-      }
-
-
-      if (
-        localStorage.getItem(
-          "humanityJoined"
-        ) === "yes"
-      ) {
-
-        joinButton.textContent =
-          "YOU JOINED ✓";
-
-        joinButton.disabled =
-          true;
-
-        restoreJoinedResult();
-
-        return;
-
-      }
-
-
-      joinButton.disabled =
-        true;
-
-
-      joinButton.textContent =
-        "JOINING...";
-
-
-      try {
-
-        const worldResult =
-          await runTransaction(
-            worldRef,
-            current =>
-              (current || 0) + 1
-          );
-
-
-        await runTransaction(
-          countryRef,
-          current =>
-            (current || 0) + 1
-        );
-
-
-        const newHumanNumber =
-          worldResult.snapshot.val();
-
-
-        const flagEmoji =
-          countryCodeToFlagEmoji(
-            countryCode
-          );
-
-
-        localStorage.setItem(
-          "humanityJoined",
-          "yes"
-        );
-
-
-        localStorage.setItem(
-          "humanityNumber",
-          String(newHumanNumber)
-        );
-
-
-        localStorage.setItem(
-          "humanityCountry",
-          countryName
-        );
-
-
-        localStorage.setItem(
-          "humanityCode",
-          countryCode
-        );
-
-
-        humanNumber.textContent =
-          "HUMAN #" +
-          numberFormat(
-            newHumanNumber
-          );
-
-
-        joinedMessage.textContent =
-          flagEmoji +
-          " You just moved " +
-          countryName +
-          " +1.";
-
-
-        result.style.display =
-          "block";
-
-
-        joinButton.textContent =
-          "YOU JOINED ✓";
-
-
-        joinButton.disabled =
-          true;
-
-
-        result.scrollIntoView({
-          behavior: "smooth",
-          block: "center"
-        });
-
-
-      } catch (error) {
-
-        console.error(error);
-
-
-        joinButton.textContent =
-          "TRY AGAIN";
-
-
-        joinButton.disabled =
-          false;
-
-      }
+        savedCode ||
+          detectedCountryCode
+      );
 
     }
 
@@ -1159,59 +1786,49 @@
     );
 
 
+    /* =========================
+       SHARE
+    ========================= */
+
     shareButton.addEventListener(
       "click",
-
       async () => {
 
         const number =
           localStorage.getItem(
             "humanityNumber"
-          );
+          ) || "";
 
-
-        const savedCountry =
+        const country =
           localStorage.getItem(
             "humanityCountry"
-          ) ||
-          countryName ||
-          "Earth";
+          ) || "";
 
 
-        const savedCode =
-          localStorage.getItem(
-            "humanityCode"
-          ) ||
-          countryCode;
-
-
-        const flagEmoji =
-          countryCodeToFlagEmoji(
-            savedCode
-          );
-
-
-        const shareText =
-          "I'm Human #" +
+        const text =
+          "I joined Humanity Live from " +
+          country +
+          " as HUMAN #" +
           number +
-          " on Earth 🌍\n" +
-          flagEmoji +
-          " " +
-          savedCountry +
-          "\n" +
-          "What number are you? Join and find yours.";
+          ". 🌍";
 
 
         const shareData = {
-          title: "Humanity Live",
-          text: shareText,
-          url: window.location.href
+          title:
+            "Humanity Live",
+
+          text,
+
+          url:
+            window.location.href
         };
 
 
         try {
 
-          if (navigator.share) {
+          if (
+            navigator.share
+          ) {
 
             await navigator.share(
               shareData
@@ -1219,11 +1836,12 @@
 
           } else {
 
-            await navigator.clipboard.writeText(
-              shareText +
-              "\n" +
-              window.location.href
-            );
+            await navigator.clipboard
+              .writeText(
+                text +
+                " " +
+                window.location.href
+              );
 
 
             shareButton.textContent =
@@ -1232,26 +1850,25 @@
 
             setTimeout(
               () => {
-
                 shareButton.textContent =
-                  "SHARE YOUR NUMBER ↗";
-
+                  "SHARE HUMANITY LIVE";
               },
-              2200
+              1800
             );
 
           }
 
-
-        } catch (error) {
-
-          console.log(error);
-
-        }
+        } catch (_) {}
 
       }
     );
 
+
+    /* =========================
+       START
+    ========================= */
+
+    await loadMapCountries();
 
     detectCountry();
 
