@@ -402,11 +402,7 @@
         return "🌐";
       }
 
-      return code
-        .toUpperCase()
-        .replace(/./g, char =>
-          String.fromCodePoint(127397 + char.charCodeAt())
-        );
+     return code.toUpperCase();
     }
 
 
@@ -465,7 +461,7 @@
         countryName = detectedName || detectedCode;
         countryFlag = countryCodeToFlag(countryCode);
 
-        countryFlagEl.textContent = countryFlag;
+       countryFlagEl.innerHTML = `<img src="https://flagcdn.com/w160/${countryCode.toLowerCase()}.png" alt="${countryName} flag" style="width:90px;height:auto;border-radius:8px;">`;
         countryNameEl.textContent = countryName;
 
         countryStatus.textContent =
