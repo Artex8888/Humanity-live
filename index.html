@@ -5,10 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Humanity Live</title>
+
   <meta
     name="description"
     content="Join humanity. See your country, get your human number, and watch the world connect live."
   />
+
+  <meta name="theme-color" content="#050505" />
 
   <style>
     * {
@@ -17,11 +20,12 @@
 
     :root {
       --bg: #050505;
-      --card: rgba(255,255,255,0.06);
-      --card-border: rgba(255,255,255,0.10);
+      --card: rgba(255, 255, 255, 0.06);
+      --card-border: rgba(255, 255, 255, 0.10);
       --text: #ffffff;
-      --muted: #949494;
+      --muted: #9a9a9a;
       --green: #72ff9c;
+      --danger: #ff9292;
     }
 
     html {
@@ -32,7 +36,12 @@
       margin: 0;
       min-height: 100vh;
       background:
-        radial-gradient(circle at top, #16231b 0%, #090909 32%, #050505 70%);
+        radial-gradient(
+          circle at top,
+          #16231b 0%,
+          #090909 32%,
+          #050505 70%
+        );
       color: var(--text);
       font-family: Arial, Helvetica, sans-serif;
       display: flex;
@@ -43,7 +52,7 @@
     .container {
       width: 92%;
       max-width: 650px;
-      padding: 38px 0 60px;
+      padding: 34px 0 60px;
     }
 
     .live-badge {
@@ -71,15 +80,25 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.45; transform: scale(0.75); }
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.45;
+        transform: scale(0.75);
+      }
     }
 
     .earth {
       font-size: 78px;
       line-height: 1;
       margin-bottom: 14px;
-      filter: drop-shadow(0 0 28px rgba(91, 180, 255, 0.22));
+      filter:
+        drop-shadow(
+          0 0 28px rgba(91, 180, 255, 0.22)
+        );
     }
 
     h1 {
@@ -142,9 +161,21 @@
     }
 
     .flag {
-      font-size: 64px;
-      line-height: 1;
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin-bottom: 12px;
+      font-size: 56px;
+    }
+
+    .flag img {
+      width: 90px;
+      max-height: 62px;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
     }
 
     .country-name {
@@ -172,7 +203,9 @@
       font-size: 18px;
       font-weight: 800;
       cursor: pointer;
-      transition: transform .18s ease, opacity .18s ease;
+      transition:
+        transform .18s ease,
+        opacity .18s ease;
     }
 
     button:hover {
@@ -192,7 +225,8 @@
     #joinButton {
       background: #fff;
       color: #050505;
-      box-shadow: 0 15px 40px rgba(255,255,255,0.08);
+      box-shadow:
+        0 15px 40px rgba(255,255,255,0.08);
     }
 
     .result {
@@ -200,12 +234,14 @@
       margin-top: 20px;
       border-radius: 24px;
       padding: 28px 22px;
-      background: linear-gradient(
-        145deg,
-        rgba(114,255,156,0.10),
-        rgba(255,255,255,0.04)
-      );
-      border: 1px solid rgba(114,255,156,0.18);
+      background:
+        linear-gradient(
+          145deg,
+          rgba(114,255,156,0.10),
+          rgba(255,255,255,0.04)
+        );
+      border:
+        1px solid rgba(114,255,156,0.18);
     }
 
     .result-title {
@@ -232,7 +268,8 @@
       margin-top: 18px;
       background: rgba(255,255,255,0.10);
       color: white;
-      border: 1px solid rgba(255,255,255,0.12);
+      border:
+        1px solid rgba(255,255,255,0.12);
     }
 
     .footer {
@@ -243,7 +280,7 @@
     }
 
     .error {
-      color: #ff9292;
+      color: var(--danger);
     }
 
     @media (max-width: 480px) {
@@ -280,12 +317,20 @@
     <h1>Humanity Live</h1>
 
     <div class="subtitle">
-      One planet. Every country. One growing human connection.
+      One planet. Every country.
+      One growing human connection.
     </div>
 
-    <div class="world-label">HUMANS JOINED WORLDWIDE</div>
+    <div class="world-label">
+      HUMANS JOINED WORLDWIDE
+    </div>
 
-    <div class="counter" id="worldCounter">0</div>
+    <div
+      class="counter"
+      id="worldCounter"
+    >
+      0
+    </div>
 
     <div class="counter-label">
       humans have joined
@@ -297,37 +342,61 @@
         YOUR COUNTRY
       </div>
 
-      <div class="flag" id="countryFlag">🌐</div>
+      <div
+        class="flag"
+        id="countryFlag"
+      >
+        🌐
+      </div>
 
-      <div class="country-name" id="countryName">
+      <div
+        class="country-name"
+        id="countryName"
+      >
         Detecting your country...
       </div>
 
       <div class="country-count">
-        <span id="countryCounter">0</span> humans joined
+        <span id="countryCounter">0</span>
+        humans joined
       </div>
 
-      <div class="detecting" id="countryStatus">
+      <div
+        class="detecting"
+        id="countryStatus"
+      >
         Detecting automatically from your network
       </div>
 
     </section>
 
-    <button id="joinButton" disabled>
+    <button
+      id="joinButton"
+      disabled
+    >
       DETECTING COUNTRY...
     </button>
 
-    <section class="result" id="result">
+    <section
+      class="result"
+      id="result"
+    >
 
       <div class="result-title">
         YOU ARE
       </div>
 
-      <div class="human-number" id="humanNumber">
+      <div
+        class="human-number"
+        id="humanNumber"
+      >
         HUMAN #0
       </div>
 
-      <div class="joined-message" id="joinedMessage">
+      <div
+        class="joined-message"
+        id="joinedMessage"
+      >
         You joined humanity.
       </div>
 
@@ -339,7 +408,8 @@
 
     <div class="footer">
       One browser can join once.<br>
-      Country detection is approximate and may differ when using a VPN.
+      Country detection is approximate
+      and may differ when using a VPN.
     </div>
 
   </main>
@@ -347,157 +417,334 @@
 
   <script type="module">
 
-    import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import {
+      initializeApp
+    } from
+      "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+
 
     import {
       getDatabase,
       ref,
       onValue,
       runTransaction
-    }
-      from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+    } from
+      "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDJWMHrk6-EwjG_LXLK0CAj3uFLRCuba0Q",
-      authDomain: "humanity-live.firebaseapp.com",
-      databaseURL: "https://humanity-live-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "humanity-live",
-      storageBucket: "humanity-live.firebasestorage.app",
-      messagingSenderId: "969876214498",
-      appId: "1:969876214498:web:97c4cfa8c81650961c44bb"
+
+      apiKey:
+        "AIzaSyDJWMHrk6-EwjG_LXLK0CAj3uFLRCuba0Q",
+
+      authDomain:
+        "humanity-live.firebaseapp.com",
+
+      databaseURL:
+        "https://humanity-live-default-rtdb.europe-west1.firebasedatabase.app",
+
+      projectId:
+        "humanity-live",
+
+      storageBucket:
+        "humanity-live.firebasestorage.app",
+
+      messagingSenderId:
+        "969876214498",
+
+      appId:
+        "1:969876214498:web:97c4cfa8c81650961c44bb"
     };
 
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    const app =
+      initializeApp(firebaseConfig);
 
-    const worldRef = ref(db, "counters/world");
+    const db =
+      getDatabase(app);
+
+
+    const worldRef =
+      ref(db, "counters/world");
+
 
     let countryCode = null;
     let countryName = null;
-    let countryFlag = "🌐";
     let countryRef = null;
 
-    const worldCounter = document.getElementById("worldCounter");
-    const countryCounter = document.getElementById("countryCounter");
-    const countryNameEl = document.getElementById("countryName");
-    const countryFlagEl = document.getElementById("countryFlag");
-    const countryStatus = document.getElementById("countryStatus");
-    const joinButton = document.getElementById("joinButton");
-    const result = document.getElementById("result");
-    const humanNumber = document.getElementById("humanNumber");
-    const joinedMessage = document.getElementById("joinedMessage");
-    const shareButton = document.getElementById("shareButton");
+
+    const worldCounter =
+      document.getElementById(
+        "worldCounter"
+      );
+
+    const countryCounter =
+      document.getElementById(
+        "countryCounter"
+      );
+
+    const countryNameEl =
+      document.getElementById(
+        "countryName"
+      );
+
+    const countryFlagEl =
+      document.getElementById(
+        "countryFlag"
+      );
+
+    const countryStatus =
+      document.getElementById(
+        "countryStatus"
+      );
+
+    const joinButton =
+      document.getElementById(
+        "joinButton"
+      );
+
+    const result =
+      document.getElementById(
+        "result"
+      );
+
+    const humanNumber =
+      document.getElementById(
+        "humanNumber"
+      );
+
+    const joinedMessage =
+      document.getElementById(
+        "joinedMessage"
+      );
+
+    const shareButton =
+      document.getElementById(
+        "shareButton"
+      );
 
 
     function numberFormat(value) {
-      return Number(value || 0).toLocaleString("en-US");
+
+      return Number(
+        value || 0
+      ).toLocaleString("en-US");
+
     }
 
 
-    function countryCodeToFlag(code) {
-  if (!code || code.length !== 2) {
-    return "🌍";
-  }
+    function countryCodeToFlagEmoji(code) {
 
-  return code.toUpperCase();
-}
+      if (
+        !code ||
+        code.length !== 2
+      ) {
+        return "🌍";
+      }
 
-function countryCodeToFlagEmoji(code) {
-  if (!code || code.length !== 2) {
-    return "🌍";
-  }
+      return code
+        .toUpperCase()
+        .replace(
+          /./g,
+          char =>
+            String.fromCodePoint(
+              127397 +
+              char.charCodeAt()
+            )
+        );
 
-  return code
-    .toUpperCase()
-    .replace(/./g, char =>
-      String.fromCodePoint(127397 + char.charCodeAt())
-    );
-}
+    }
+
+
+    function showCountryFlag(
+      code,
+      name
+    ) {
+
+      countryFlagEl.replaceChildren();
+
+      const img =
+        document.createElement("img");
+
+      img.src =
+        "https://flagcdn.com/w160/" +
+        code.toLowerCase() +
+        ".png";
+
+      img.alt =
+        name + " flag";
+
+      img.loading =
+        "eager";
+
+
+      img.addEventListener(
+        "error",
+        () => {
+
+          countryFlagEl.textContent =
+            countryCodeToFlagEmoji(code);
+
+        }
+      );
+
+
+      countryFlagEl.appendChild(img);
+
+    }
 
 
     function animateWorldCounter() {
-      worldCounter.classList.remove("bump");
 
-      requestAnimationFrame(() => {
-        worldCounter.classList.add("bump");
-      });
+      worldCounter.classList.remove(
+        "bump"
+      );
 
-      setTimeout(() => {
-        worldCounter.classList.remove("bump");
-      }, 300);
+      requestAnimationFrame(
+        () => {
+
+          worldCounter.classList.add(
+            "bump"
+          );
+
+        }
+      );
+
+      setTimeout(
+        () => {
+
+          worldCounter.classList.remove(
+            "bump"
+          );
+
+        },
+        300
+      );
+
     }
 
 
-    onValue(worldRef, snapshot => {
+    onValue(
+      worldRef,
+      snapshot => {
 
-      const value = snapshot.val() || 0;
+        const value =
+          snapshot.val() || 0;
 
-      worldCounter.textContent = numberFormat(value);
+        worldCounter.textContent =
+          numberFormat(value);
 
-      animateWorldCounter();
+        animateWorldCounter();
 
-    });
+      }
+    );
 
 
     async function detectCountry() {
 
       try {
 
-        const response = await fetch(
-          "https://ipapi.co/json/",
-          {
-            cache: "no-store"
-          }
-        );
+        const response =
+          await fetch(
+            "https://ipapi.co/json/",
+            {
+              cache: "no-store"
+            }
+          );
+
 
         if (!response.ok) {
-          throw new Error("Country lookup failed");
+
+          throw new Error(
+            "Country lookup failed"
+          );
+
         }
 
-        const data = await response.json();
+
+        const data =
+          await response.json();
+
 
         const detectedCode =
-          (data.country_code || data.country || "").toUpperCase();
+          (
+            data.country_code ||
+            data.country ||
+            ""
+          ).toUpperCase();
+
 
         const detectedName =
           data.country_name || "";
 
-        if (!detectedCode || detectedCode.length !== 2) {
-          throw new Error("Country code missing");
+
+        if (
+          !detectedCode ||
+          detectedCode.length !== 2
+        ) {
+
+          throw new Error(
+            "Country code missing"
+          );
+
         }
 
-        countryCode = detectedCode;
-        countryName = detectedName || detectedCode;
-        countryFlag = countryCodeToFlag(countryCode);
 
-       countryFlagEl.innerHTML = `<img src="https://flagcdn.com/w160/${countryCode.toLowerCase()}.png" alt="${countryName} flag" style="width:90px;height:auto;border-radius:8px;">`;
-        countryNameEl.textContent = countryName;
+        countryCode =
+          detectedCode;
+
+        countryName =
+          detectedName ||
+          detectedCode;
+
+
+        showCountryFlag(
+          countryCode,
+          countryName
+        );
+
+
+        countryNameEl.textContent =
+          countryName;
+
 
         countryStatus.textContent =
           "Country detected automatically";
 
+
         countryRef =
-          ref(db, "countries/" + countryCode);
-
-        onValue(countryRef, snapshot => {
-
-          const value = snapshot.val() || 0;
-
-          countryCounter.textContent =
-            numberFormat(value);
-
-        });
+          ref(
+            db,
+            "countries/" +
+            countryCode
+          );
 
 
-        if (localStorage.getItem("humanityJoined")) {
+        onValue(
+          countryRef,
+          snapshot => {
+
+            const value =
+              snapshot.val() || 0;
+
+            countryCounter.textContent =
+              numberFormat(value);
+
+          }
+        );
+
+
+        if (
+          localStorage.getItem(
+            "humanityJoined"
+          )
+        ) {
 
           joinButton.textContent =
             "YOU JOINED ✓";
 
-          joinButton.disabled = true;
+          joinButton.disabled =
+            true;
 
           restoreJoinedResult();
 
@@ -507,26 +754,37 @@ function countryCodeToFlagEmoji(code) {
             "JOIN FROM " +
             countryName.toUpperCase() +
             " " +
-            countryFlag;
+            countryCodeToFlagEmoji(
+              countryCode
+            );
 
-          joinButton.disabled = false;
+          joinButton.disabled =
+            false;
 
         }
+
 
       } catch (error) {
 
         console.error(error);
 
-        countryFlagEl.textContent = "🌐";
-        countryNameEl.textContent = "Country unavailable";
+        countryFlagEl.textContent =
+          "🌐";
+
+        countryNameEl.textContent =
+          "Country unavailable";
 
         countryStatus.innerHTML =
-          '<span class="error">Could not detect your country. Refresh to try again.</span>';
+          '<span class="error">' +
+          'Could not detect your country. ' +
+          'Refresh to try again.' +
+          '</span>';
 
         joinButton.textContent =
           "COUNTRY DETECTION FAILED";
 
-        joinButton.disabled = true;
+        joinButton.disabled =
+          true;
 
       }
 
@@ -536,27 +794,52 @@ function countryCodeToFlagEmoji(code) {
     function restoreJoinedResult() {
 
       const savedNumber =
-        localStorage.getItem("humanityNumber");
+        localStorage.getItem(
+          "humanityNumber"
+        );
+
 
       const savedCountry =
-        localStorage.getItem("humanityCountry");
+        localStorage.getItem(
+          "humanityCountry"
+        );
 
-      const savedFlag =
-        localStorage.getItem("humanityFlag");
+
+      const savedCode =
+        localStorage.getItem(
+          "humanityCode"
+        );
+
 
       if (!savedNumber) {
         return;
       }
 
-      result.style.display = "block";
+
+      const flagEmoji =
+        countryCodeToFlagEmoji(
+          savedCode ||
+          countryCode
+        );
+
+
+      result.style.display =
+        "block";
+
 
       humanNumber.textContent =
-        "HUMAN #" + numberFormat(savedNumber);
+        "HUMAN #" +
+        numberFormat(savedNumber);
+
 
       joinedMessage.textContent =
-        (savedFlag || countryFlag) +
+        flagEmoji +
         " You joined from " +
-        (savedCountry || countryName || "your country") +
+        (
+          savedCountry ||
+          countryName ||
+          "your country"
+        ) +
         ".";
 
     }
@@ -564,16 +847,25 @@ function countryCodeToFlagEmoji(code) {
 
     async function joinHumanity() {
 
-      if (!countryRef || !countryCode) {
+      if (
+        !countryRef ||
+        !countryCode
+      ) {
         return;
       }
 
-      if (localStorage.getItem("humanityJoined")) {
+
+      if (
+        localStorage.getItem(
+          "humanityJoined"
+        )
+      ) {
 
         joinButton.textContent =
           "YOU JOINED ✓";
 
-        joinButton.disabled = true;
+        joinButton.disabled =
+          true;
 
         restoreJoinedResult();
 
@@ -581,21 +873,28 @@ function countryCodeToFlagEmoji(code) {
 
       }
 
-      joinButton.disabled = true;
-      joinButton.textContent = "JOINING...";
+
+      joinButton.disabled =
+        true;
+
+      joinButton.textContent =
+        "JOINING...";
+
 
       try {
 
         const worldResult =
           await runTransaction(
             worldRef,
-            current => (current || 0) + 1
+            current =>
+              (current || 0) + 1
           );
 
 
         await runTransaction(
           countryRef,
-          current => (current || 0) + 1
+          current =>
+            (current || 0) + 1
         );
 
 
@@ -608,48 +907,64 @@ function countryCodeToFlagEmoji(code) {
           "yes"
         );
 
+
         localStorage.setItem(
           "humanityNumber",
           String(newHumanNumber)
         );
+
 
         localStorage.setItem(
           "humanityCountry",
           countryName
         );
 
+
         localStorage.setItem(
           "humanityCode",
           countryCode
         );
 
-        localStorage.setItem(
-          "humanityFlag",
-          countryFlag
-        );
+
+        const flagEmoji =
+          countryCodeToFlagEmoji(
+            countryCode
+          );
 
 
         humanNumber.textContent =
           "HUMAN #" +
-          numberFormat(newHumanNumber);
+          numberFormat(
+            newHumanNumber
+          );
+
 
         joinedMessage.textContent =
-          countryFlag +
+          flagEmoji +
           " You just moved " +
           countryName +
           " +1.";
 
-        result.style.display = "block";
+
+        result.style.display =
+          "block";
+
 
         joinButton.textContent =
           "YOU JOINED ✓";
 
-        joinButton.disabled = true;
 
-        result.scrollIntoView({
-          behavior: "smooth",
-          block: "center"
-        });
+        joinButton.disabled =
+          true;
+
+
+        result.scrollIntoView(
+          {
+            behavior: "smooth",
+            block: "center"
+          }
+        );
+
 
       } catch (error) {
 
@@ -658,7 +973,8 @@ function countryCodeToFlagEmoji(code) {
         joinButton.textContent =
           "TRY AGAIN";
 
-        joinButton.disabled = false;
+        joinButton.disabled =
+          false;
 
       }
 
@@ -676,32 +992,55 @@ function countryCodeToFlagEmoji(code) {
       async () => {
 
         const number =
-          localStorage.getItem("humanityNumber");
+          localStorage.getItem(
+            "humanityNumber"
+          );
+
 
         const savedCountry =
-          localStorage.getItem("humanityCountry") ||
+          localStorage.getItem(
+            "humanityCountry"
+          ) ||
           countryName ||
           "Earth";
 
-        const savedFlag =
-          localStorage.getItem("humanityFlag") ||
-          countryFlag ||
-          "🌍";
+
+        const savedCode =
+          localStorage.getItem(
+            "humanityCode"
+          ) ||
+          countryCode;
 
 
-        const flagEmoji = countryCodeToFlagEmoji(
-  localStorage.getItem("humanityCode") || countryCode
-);
+        const flagEmoji =
+          countryCodeToFlagEmoji(
+            savedCode
+          );
 
-const shareText =
-  "I'm Human #" + number + " on Earth 🌍\n" +
-  flagEmoji + " " + savedCountry + "\n" +
-  "What number are you? Join and find yours.";
+
+        const shareText =
+          "I'm Human #" +
+          number +
+          " on Earth 🌍\n" +
+          flagEmoji +
+          " " +
+          savedCountry +
+          "\n" +
+          "What number are you? " +
+          "Join and find yours.";
+
 
         const shareData = {
-          title: "Humanity Live",
-          text: shareText,
-          url: window.location.href
+
+          title:
+            "Humanity Live",
+
+          text:
+            shareText,
+
+          url:
+            window.location.href
+
         };
 
 
@@ -709,25 +1048,36 @@ const shareText =
 
           if (navigator.share) {
 
-            await navigator.share(shareData);
+            await navigator.share(
+              shareData
+            );
 
           } else {
 
-            await navigator.clipboard.writeText(
-              shareText +
-              "\n" +
-              window.location.href
-            );
+            await navigator.clipboard
+              .writeText(
+                shareText +
+                "\n" +
+                window.location.href
+              );
+
 
             shareButton.textContent =
               "LINK COPIED ✓";
 
-            setTimeout(() => {
-              shareButton.textContent =
-                "SHARE YOUR NUMBER ↗";
-            }, 2200);
+
+            setTimeout(
+              () => {
+
+                shareButton.textContent =
+                  "SHARE YOUR NUMBER ↗";
+
+              },
+              2200
+            );
 
           }
+
 
         } catch (error) {
 
