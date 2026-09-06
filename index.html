@@ -398,12 +398,24 @@
 
 
     function countryCodeToFlag(code) {
-      if (!code || code.length !== 2) {
-        return "🌐";
-      }
+  if (!code || code.length !== 2) {
+    return "🌍";
+  }
 
-     return code.toUpperCase();
-    }
+  return code.toUpperCase();
+}
+
+function countryCodeToFlagEmoji(code) {
+  if (!code || code.length !== 2) {
+    return "🌍";
+  }
+
+  return code
+    .toUpperCase()
+    .replace(/./g, char =>
+      String.fromCodePoint(127397 + char.charCodeAt())
+    );
+}
 
 
     function animateWorldCounter() {
@@ -677,15 +689,14 @@
           "🌍";
 
 
-        const shareText =
-          "I'm Human #" +
-          number +
-          " from " +
-          savedCountry +
-          " " +
-          savedFlag +
-          " 🌍 What number are you?";
+        const flagEmoji = countryCodeToFlagEmoji(
+  localStorage.getItem("humanityCode") || countryCode
+);
 
+const shareText =
+  "I'm Human #" + number + " on Earth 🌍\n" +
+  flagEmoji + " " + savedCountry + "\n" +
+  "What number are you? Join and find yours.";
 
         const shareData = {
           title: "Humanity Live",
